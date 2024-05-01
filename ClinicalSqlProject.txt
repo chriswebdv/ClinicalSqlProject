@@ -1,0 +1,130 @@
+select first
+	  ,last
+	  ,birthdate
+	  ,ssn
+	  ,passport
+	  ,id
+from public.patients;
+
+-- Find the various types of hospital encounters in the database
+
+select distinct encounterclass
+from public.encounters;
+
+-- Find number of inpatient visits
+
+select *
+from public.encounters
+where encounterclass = 'inpatient';
+
+select *
+from public.encounters
+where encounterclass = 'inpatient' and description = 'ICU Admission'
+
+select *
+from public.encounters
+where encounterclass = 'inpatient' 
+	and description = 'ICU Admission'
+	and stop >= '2023-01-01 00:00';
+
+select *
+from public.encounters
+where encounterclass = 'inpatient' 
+	and description = 'ICU Admission'
+	and stop >= '2023-01-01 00:00'
+	and stop <= '2023-12-31 23:59';
+
+-- Using between keyword
+select *
+from public.encounters
+where encounterclass = 'inpatient' 
+	and description = 'ICU Admission'
+	and stop between '2023-01-01 00:00'
+	and '2023-12-31 23:59';
+
+-- using OR keywork to seatch for either encounterclasses
+
+select *
+from public.encounters
+where encounterclass = 'outpatient' 
+	or encounterclass = 'ambulatory'; 
+
+--Using the IN  keyword to get the same result as the code before but more concise.
+
+select *
+from public.encounters
+where encounterclass in ('outpatient','ambulatory');
+
+-- Query all the data inside the conditions table
+
+select *
+from public.conditions;
+
+-- Find the highest number of medical conditions
+
+select description,
+	   count(*) as count_of_cond
+from public.conditions
+group by description
+order by count_of_cond desc
+
+-- Find the top 10 medical conditions 
+
+select description,
+	   count(*) as count_of_cond
+from public.conditions
+group by description
+order by count_of_cond desc
+limit 10;
+
+-- The medical condtions that are over 5000 in number
+
+select description,
+	   count(*) as count_of_cond
+from public.conditions
+group by description
+having count(*) > 5000
+order by count(*) desc
+
+select description,
+	   count(*) as count_of_cond
+from public.conditions
+where description != 'Body Mass Index 30.0-30.9, adult'
+group by description
+having count(*) > 5000
+order by count(*) desc
+
+-- Get all the patients who live in Boston
+
+select * 
+from public.patients
+where city = 'Boston';
+
+-- Find patients who have a specific condition but can only be within the specific medical codes
+
+select * 
+from public.conditions
+where description like 'Chronic%'
+and code in ('585.1','585.2','585.3','585.4');
+
+-- Find the number of patients per city.
+-- Do not include Boston
+-- The cities in the query must have at least 100 patients
+
+select city,
+	   count(*)	as count_of_cities
+from public.patients
+where city != 'Boston'
+group by city
+having count(*) >= 100
+order by count(*) desc;
+
+-- Left join immunizations and patients table
+
+select t1.*,
+	   t2.first,
+	   t2.last,
+	   t2.birthdate
+from public.immunizations as t1
+left join public.patients as t2
+	on t1.patient = t2.id
